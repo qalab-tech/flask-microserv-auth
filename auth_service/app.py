@@ -1,4 +1,6 @@
 # auth_service/auth_service.py
+import os
+
 import bcrypt
 from flask import Flask, request, jsonify
 from users_repository import fetch_hashed_password
@@ -6,7 +8,7 @@ import jwt
 import datetime
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'hudTTPZbw6WV4yxEUnVdT5CooIT1TepeD0-Nwlw_-D4' # For DEBUG Only!!! Remove for Production!
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
 
 @app.route('/auth/login', methods=['POST'])
