@@ -1,0 +1,28 @@
+# Ignore PyCharm configuration
+.idea/
+
+# Ignore pytest caches
+.pytest_cache/
+
+# Ignore venv
+venv/
+Lib/
+include/
+Scripts/
+
+# Ignore Python cache
+__pycache__/
+
+# Ignore logs
+*.log
+#tests/
+for_local_tests/
+# Ignore test config
+test_config.yaml
+
+# Ignore other files
+*.pyc
+*.pyo
+.DS_Store
+
+

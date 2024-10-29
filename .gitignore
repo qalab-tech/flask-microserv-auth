@@ -1,0 +1,68 @@
+# Python files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+*.egg
+*.whl
+
+# Virtual environment
+Scripts/
+include/
+Lib/
+venv/
+env/
+.venv/
+pyvenv.cfg
+
+# Binary files
+*.so
+
+# logs and html-reports files
+*.log
+logs/
+*.html
+
+# IDE configuration files
+.vscode/
+assets/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# System files
+.DS_Store
+Thumbs.db
+
+# pytest folders and files
+.cache/
+*.pytest_cache/
+
+# Компилированные файлы Cython
+*.c
+*.cpp
+
+# SQLite database files
+*.sqlite3
+
+# YAML-configs for testing
+#config_test.yaml
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# Docker
+docker-compose.override.yml
+
+# Python packages
+site/
+dist/
+build/
+*.egg-info
+
+# Temporary files
+*.bak
+*.swp
+*~
+
