@@ -13,7 +13,6 @@ try:
     connection_pool = psycopg2.pool.SimpleConnectionPool(1, 20, DATABASE_URL)
     if connection_pool:
         logger.info("Connection pool created successfully")
-
 except Exception as e:
     logger.error(f"Error creating connection pool: {str(e)}")
     raise
@@ -36,10 +35,9 @@ def release_db_connection(connection):
     try:
         if connection:
             connection_pool.putconn(connection)
-            # logger.info("Connection returned to pool")
+            logger.info("Connection returned to pool")
     except Exception as e:
-        # logger.error(f"Error releasing connection: {str(e)}")
-        print(f"Error releasing connection: {str(e)}")
+        logger.error(f"Error releasing connection: {str(e)}")
 
 
 def close_all_connections():
@@ -50,3 +48,6 @@ def close_all_connections():
             logger.info("All connections in the pool closed")
     except Exception as e:
         logger.error(f"Error closing all connections: {str(e)}")
+
+
+
