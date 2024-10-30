@@ -1,6 +1,5 @@
 # auth_service/auth_service.py
 import os
-
 import bcrypt
 from flask import Flask, request, jsonify
 from users_repository import fetch_hashed_password
@@ -48,5 +47,3 @@ def validate():
         return jsonify({'status': 'invalid'}), 401
 
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5001)
