@@ -1,7 +1,5 @@
-import psycopg2
 import psycopg2.extras
 from db import get_db_connection, release_db_connection
-import os
 from logger_config import setup_logger
 
 logger = setup_logger("users_repository")
