@@ -29,4 +29,4 @@ COPY . .
 EXPOSE 5001
 
 # Run Flask app with Gunicorn
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5001", "auth_service:app"]
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5001", "auth_service.app:app"]
