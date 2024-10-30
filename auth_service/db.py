@@ -5,7 +5,7 @@ from logger_config import setup_logger
 
 logger = setup_logger("db_connection")
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL = os.getenv("AUTH_DATABASE_URL")
 
 
 # Init Pool
