@@ -10,7 +10,7 @@ DATABASE_URL = os.getenv("AUTH_DATABASE_URL")
 
 # Init Pool
 try:
-    connection_pool = psycopg2.pool.SimpleConnectionPool(1, 20, DATABASE_URL)
+    connection_pool = psycopg2.pool.SimpleConnectionPool(1, 20, AUTH_DATABASE_URL)
     if connection_pool:
         logger.info("Connection pool created successfully")
 
