@@ -56,4 +56,3 @@ def validate():
     except jwt.InvalidTokenError:
         logger.error("Token invalid")
         return jsonify({'status': 'invalid'}), 401
-    except jwt.
