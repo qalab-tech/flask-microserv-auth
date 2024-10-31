@@ -42,11 +42,12 @@ def login():
 @auth_bp.route('/validate', methods=['GET'])
 def validate():
     """User validation endpoint"""
-    token = request.headers.get('Authorization').split()[1]
-    if not token:
+    bearer_token = request.headers.get('Authorization')
+    if not bearer_token:
         logger.error("Token is missing!")
         return jsonify({"message": "Token is missing!"}), 403
     try:
+        token = bearer_token.split()[1]
         data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
         return jsonify({'status': 'valid', 'user': data['username']})
     except jwt.ExpiredSignatureError:
