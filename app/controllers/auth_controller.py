@@ -44,11 +44,16 @@ def validate():
     """User validation endpoint"""
     token = request.headers.get('Authorization').split()[1]
     try:
-        data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
-        return jsonify({'status': 'valid', 'user': data['username']})
+        if token:
+            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+            return jsonify({'status': 'valid', 'user': data['username']})
+        else:
+            logger.error("Token not found")
+            return jsonify({'status': 'Token not found'}), 401
     except jwt.ExpiredSignatureError:
         logger.error("Token expired")
         return jsonify({'status': 'expired'}), 401
     except jwt.InvalidTokenError:
         logger.error("Token invalid")
         return jsonify({'status': 'invalid'}), 401
+    except jwt.
