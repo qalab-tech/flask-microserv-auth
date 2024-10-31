@@ -1,5 +1,5 @@
 import bcrypt
-from users_repository import fetch_hashed_password
+from app.repositories.auth_repository import fetch_hashed_password
 
 def check_user_password(username, password):
     hashed_password = fetch_hashed_password(username)

@@ -5,7 +5,7 @@ from logger_config import setup_logger
 
 logger = setup_logger("db_connection")
 
-DATABASE_URL = os.getenv("AUTH_DATABASE_URL")
+DATABASE_URL = os.getenv("AUTH_DATABASE_URL", "postgresql://auth_user:Gl00m17@192.168.88.18/auth_service_db")
 
 
 # Init Pool

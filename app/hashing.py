@@ -1,4 +1,4 @@
-# auth_service/hashing.py
+# app/hashing.py
 import bcrypt
 
 
