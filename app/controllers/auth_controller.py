@@ -14,7 +14,7 @@ logger = setup_logger("auth_controller")
 auth_bp = Blueprint('auth', __name__)
 
 
-@app.route('/login', methods=['POST'])
+@auth_bp.route('/login', methods=['POST'])
 def login():
     username = request.json.get('username')
     password = request.json.get('password')
@@ -39,7 +39,7 @@ def login():
     return jsonify({'message': 'Invalid credentials'}), 401  # Неверный пароль
 
 
-@app.route('/validate', methods=['GET'])
+@auth_bp.route('/validate', methods=['GET'])
 def validate():
     """User validation endpoint"""
     token = request.headers.get('Authorization').split()[1]
