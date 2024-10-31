@@ -43,13 +43,12 @@ def login():
 def validate():
     """User validation endpoint"""
     token = request.headers.get('Authorization').split()[1]
+    if not token:
+        logger.error("Token is missing!")
+        return jsonify({"message": "Token is missing!"}), 403
     try:
-        if not token:
-            logger.error("Token not found")
-            return jsonify({'status': 'Token not found'}), 401
         data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
         return jsonify({'status': 'valid', 'user': data['username']})
-
     except jwt.ExpiredSignatureError:
         logger.error("Token expired")
         return jsonify({'status': 'expired'}), 401
