@@ -1,7 +1,7 @@
 import psycopg2
 from psycopg2 import pool
 import os
-from logger_config import setup_logger
+from app.logger_config import setup_logger
 
 logger = setup_logger("db_connection")
 
