@@ -33,8 +33,6 @@ def login():
             'username': username,
             'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=5)
         }, app.config['SECRET_KEY'])
-        # Выводим SECRET_KEY для диагностики
-        logger.info(f"SECRET_KEY: {app.config['SECRET_KEY']}")  # Вывод для проверки
 
         return jsonify({'token': token})
     logger.error("Wrong password. Invalid credentials")
