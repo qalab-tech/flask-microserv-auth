@@ -1,4 +1,5 @@
-from app import hash_password
+from app.hashing import hash_password
 
+password = "correct_password"
 
-print(hash_password('test'))
+print(hash_password(password))
