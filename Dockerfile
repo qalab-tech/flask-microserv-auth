@@ -1,11 +1,13 @@
 # Add the basic Python image
 FROM python:3.11-slim
 
+
 # Set the working directory
 WORKDIR /app
 
 # Install all system dependencies, including CMake and other libraries
 RUN apt-get update && apt-get install -y \
+    tzdata \
     gcc \
     g++ \
     cmake \
