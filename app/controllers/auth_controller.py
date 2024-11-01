@@ -15,7 +15,7 @@ logger = setup_logger("auth_controller")
 
 # Create auth Blueprint
 
-auth_bp = Blueprint('auth', __name__)
+auth_bp = Blueprint('auth_bp', __name__)
 auth_api = Api(auth_bp, title='Auth API', description='API for authentication')
 
 # Create namespace
