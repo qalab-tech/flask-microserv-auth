@@ -32,31 +32,29 @@ login_model = auth_api.model('Login', {
 
 
 # /login route description
-@auth_ns.route('/login')
-class Login(Resource):
-    @auth_ns.expect(login_model)
-    @auth_ns.response(200, 'Success')
-    @auth_ns.response(401, 'Invalid credentials')
-    def post(self):
-        """User login endpoint"""
-        username = request.json.get('username')
-        password = request.json.get('password')
-        hashed_password = fetch_hashed_password(username)
+@auth_bp.route('/login', methods=['POST'])
+def login():
+    username = request.json.get('username')
+    password = request.json.get('password')
+    # Get hashed password from db
+    hashed_password = fetch_hashed_password(username)
+    # Check if the user exists
+    if not hashed_password:
+        logger.error("User not found. Invalid credentials")
+        return jsonify({'message': 'Invalid credentials'}), 401  # User not found
 
-        if hashed_password is None:
-            logger.error("User not found. Invalid credential")
-            return jsonify({'message': 'Invalid credentials'}), 401
+    # Compare passwords
+    if bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8')):
+        # JWT-token generation
+        token = jwt.encode({
+            'username': username,
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=5)
+        }, app.config['SECRET_KEY'])
 
-        # Compare passwords
-        if bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8')):
-            token = jwt.encode({
-                'username': username,
-                'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=5)
-            }, app.config['SECRET_KEY'])
-            return jsonify({'token': token})
+        return jsonify({'token': token})
 
-        logger.error("Wrong password. Invalid credentials")
-        return jsonify({'message': 'Invalid credentials'}), 401
+    logger.error("Wrong password. Invalid credentials")
+    return jsonify({'message': 'Invalid credentials'}), 401  # Incorrect password
 
 
 # /validate route description
