@@ -13,14 +13,18 @@ def fetch_hashed_password(username):
         user = cursor.fetchone()
 
         if not user:
-            logger.info(f"No user found with username {username}")
+            logger.info(f"No user found with username '{username}'")
             return None
 
-        logger.info(f"User with username = {username} found in database")
+        logger.info(f"User with username = '{username}' found in database")
         return user['hashed_password']
+    except psycopg2.Error as db_err:
+        logger.error(f"Database operation error: {db_err}")
+        return None
     except Exception as e:
-        logger.error(f"Database error: {e}")
+        logger.error(f"Unexpected error: {e}")
         return None
     finally:
         cursor.close()
         release_db_connection(connection)
+
