@@ -71,7 +71,7 @@ class Validate(Resource):
         bearer_token = request.headers.get('Authorization')
         if not bearer_token:
             logger.error("Token is missing!")
-            return jsonify({"message": "Token is missing!"}), 403
+            abort(403, description="Token is missing!")
         try:
             token = bearer_token.split()[1]
             data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
