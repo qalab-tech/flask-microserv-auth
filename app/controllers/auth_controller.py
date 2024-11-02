@@ -1,7 +1,7 @@
 # app/auth_controller.py
 import os
 import bcrypt
-from flask import Flask, Blueprint, request, jsonify
+from flask import abort, Flask, Blueprint, request, jsonify
 from app.logger_config import setup_logger
 from app.repositories.auth_repository import fetch_hashed_password
 import jwt
@@ -45,8 +45,7 @@ class Login(Resource):
         # Check if the user exists
         if not hashed_password:
             logger.error("User not found. Invalid credentials")
-            return jsonify({'message': 'Invalid credentials'}), 401  # User not found
-
+            abort(401, description='Invalid credentials')
         # Compare passwords
         if bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8')):
             # JWT-token generation
