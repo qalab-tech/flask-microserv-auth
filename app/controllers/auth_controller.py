@@ -1,7 +1,7 @@
 # app/auth_controller.py
 import os
 import bcrypt
-from flask import abort, Flask, Blueprint, request, jsonify
+from flask import abort, make_response, Flask, Blueprint, request, jsonify
 from app.logger_config import setup_logger
 from app.repositories.auth_repository import fetch_hashed_password
 import jwt
@@ -24,7 +24,6 @@ auth_ns = Namespace('auth', description="Operations related to authentication")
 auth_api.add_namespace(auth_ns)
 
 # Define models for Swagger Documentation
-
 login_model = auth_api.model('Login', {
     'username': fields.String(required=True, description='Username of the user'),
     'password': fields.String(required=True, description='Password of the user')
@@ -57,7 +56,7 @@ class Login(Resource):
             return jsonify({'token': token})
 
         logger.error("Wrong password. Invalid credentials")
-        return jsonify({'message': 'Invalid credentials'}), 401  # Incorrect password
+        abort(make_response(jsonify({'message': 'Invalid credentials'}), 401)) # Incorrect password
 
 
 # /validate route description
@@ -78,10 +77,11 @@ class Validate(Resource):
             return jsonify({'status': 'valid', 'user': data['username']})
         except jwt.ExpiredSignatureError:
             logger.error("Token expired")
-            return jsonify({'status': 'expired'}), 401
+            abort(make_response(jsonify({'status': 'expired'}), 401))
         except jwt.InvalidTokenError:
             logger.error("Token invalid")
-            return jsonify({'status': 'invalid'}), 401
+            abort(make_response(jsonify({'status': 'invalid'}), 401))
+
 
 
 
