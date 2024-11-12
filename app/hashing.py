@@ -1,12 +1,28 @@
 # app/hashing.py
+
+from concurrent.futures import ThreadPoolExecutor
 import bcrypt
+
+executor = ThreadPoolExecutor(max_workers=4)
 
 
 def hash_password(password: str) -> str:
-    """Bcrypt password hashing"""
-    salt = bcrypt.gensalt()  # Generate salt
+    """Bcrypt password hashing with asynchronous execution"""
+    future = executor.submit(_hash_sync, password)
+    return future.result()
+
+
+def _hash_sync(password: str) -> str:
+    salt = bcrypt.gensalt()
     hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
-    return hashed.decode('utf-8')  # return hash as a string
+    return hashed.decode('utf-8')
+
+
+# def hash_password(password: str) -> str:
+#     """Bcrypt password hashing"""
+#     salt = bcrypt.gensalt()  # Generate salt
+#     hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
+#     return hashed.decode('utf-8')  # return hash as a string
 
 
 def check_password(password: str, hashed_password: str) -> bool:

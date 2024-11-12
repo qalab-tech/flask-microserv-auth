@@ -9,7 +9,7 @@ import datetime
 from flask_restx import Api, Resource, fields, Namespace
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'hudTTPZbw6WV4yxEUnVdT5CooIT1TepeD0-Nwlw_-D4')
 
 logger = setup_logger("auth_controller")
 
