@@ -50,7 +50,7 @@ class Login(Resource):
             # JWT-token generation
             token = jwt.encode({
                 'username': username,
-                'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=5)
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1)
             }, app.config['SECRET_KEY'])
 
             return jsonify({'token': token})
