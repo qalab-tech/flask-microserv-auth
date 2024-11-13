@@ -7,6 +7,7 @@ from app.repositories.auth_repository import fetch_hashed_password
 import jwt
 import datetime
 from flask_restx import Api, Resource, fields, Namespace
+from app.redis_cache import generate_token, verify_token
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'hudTTPZbw6WV4yxEUnVdT5CooIT1TepeD0-Nwlw_-D4')
@@ -49,11 +50,14 @@ class Login(Resource):
         # Compare passwords
         if bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8')):
 
+            # Check token in Redis Cache
+            token = generate_token(username, app.config['SECRET_KEY'])
+
             # JWT-token generation
-            token = jwt.encode({
-                'username': username,
-                'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1)
-            }, app.config['SECRET_KEY'])
+            # token = jwt.encode({
+            #     'username': username,
+            #     'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1)
+            # }, app.config['SECRET_KEY'])
 
             return jsonify({'token': token})
 
