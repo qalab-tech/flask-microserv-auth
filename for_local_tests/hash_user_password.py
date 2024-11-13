@@ -1,5 +1,5 @@
 from app.hashing import hash_password
 
-password = "test"
+password = "correct_pass"
 
 print(hash_password(password))

@@ -41,12 +41,14 @@ class Login(Resource):
         password = request.json.get('password')
         # Get hashed password from db
         hashed_password = fetch_hashed_password(username)
+
         # Check if the user exists
         if not hashed_password:
             logger.error("User not found. Invalid credentials")
             abort(401, description='Invalid credentials')
         # Compare passwords
         if bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8')):
+
             # JWT-token generation
             token = jwt.encode({
                 'username': username,
@@ -56,6 +58,7 @@ class Login(Resource):
             return jsonify({'token': token})
 
         logger.error("Wrong password. Invalid credentials")
+
         abort(make_response(jsonify({'message': 'Invalid credentials'}), 401)) # Incorrect password
 
 

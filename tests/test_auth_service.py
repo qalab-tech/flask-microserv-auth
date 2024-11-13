@@ -6,7 +6,7 @@ from app import create_app
 
 @pytest.fixture
 def client():
-    # Инициализируем приложение с тестовой конфигурацией
+    # Init test configuration for the Flask application
     app = create_app()
     app.config['TESTING'] = True
 
@@ -14,12 +14,12 @@ def client():
 
 
 def test_login(client):
-    # Отправка запроса с JSON-данными и правильным заголовком Content-Type
+    # Send request with credentials and proper  Content-Type header
     response = client.post('/auth/login', json={'username': 'test', 'password': 'test'},
                            headers={"Content-Type": "application/json"})
 
-    # Проверка на статус ответа и наличие токена в случае успеха
-    assert response.status_code in (200, 401)  # Успешный или неуспешный вход
+    # Check response status code and presence of token
+    assert response.status_code in (200, 401)
 
     if response.status_code == 200:
         assert 'token' in response.json  # Проверка, что в ответе есть токен
