@@ -4,7 +4,8 @@ import jwt
 import time
 from app.performance_monitor import log_duration
 
-# Radis connection string
+# Radis connection string (we can use a password to improve security
+
 cache = redis.Redis(host='192.168.88.18', port=3600, decode_responses=True)
 
 
