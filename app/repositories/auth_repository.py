@@ -1,10 +1,12 @@
 import psycopg2.extras
 from app.db import get_db_connection, release_db_connection
 from app.logger_config import setup_logger
+from app.performance_monitor import log_duration
 
 logger = setup_logger("users_repository")
 
 
+@log_duration
 def fetch_hashed_password(username):
     connection = get_db_connection()
     cursor = connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -27,4 +29,3 @@ def fetch_hashed_password(username):
     finally:
         cursor.close()
         release_db_connection(connection)
-
