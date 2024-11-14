@@ -80,8 +80,10 @@ class Validate(Resource):
             abort(403, description="Token is missing!")
         try:
             token = bearer_token.split()[1]
-            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
-            return jsonify({'status': 'valid', 'user': data['username']})
+            data = verify_token(token, app.config['SECRET_KEY'])
+
+            return jsonify({'status': 'valid', 'user': data['user_id']})
+
         except jwt.ExpiredSignatureError:
             logger.error("Token expired")
             abort(make_response(jsonify({'status': 'expired'}), 401))
