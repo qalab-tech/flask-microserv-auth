@@ -4,6 +4,7 @@ from app.controllers.auth_controller import auth_bp
 
 def create_app():
     app = Flask(__name__)
+    app.url_map.strict_slashes = False
     # Register BluePrint
     app.register_blueprint(auth_bp, url_prefix='/')
 
