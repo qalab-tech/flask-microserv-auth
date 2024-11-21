@@ -3,10 +3,17 @@ import redis
 import jwt
 import time
 from app.performance_monitor import log_duration
+import os
+from dotenv import load_dotenv
 
-# Radis connection string (we can use a password to improve security
+load_dotenv()
 
-cache = redis.Redis(host='192.168.88.18', port=3600, decode_responses=True)
+# Radis connection string (we can use a password to improve security)
+
+REDIS_HOST = os.getenv("REDIS_HOST")
+REDIS_PORT = os.getenv("REDIS_PORT")
+
+cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
 
 
 # Token generation

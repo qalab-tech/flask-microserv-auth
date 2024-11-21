@@ -2,10 +2,13 @@ import psycopg2
 from psycopg2 import pool
 import os
 from app.logger_config import setup_logger
+from dotenv import load_dotenv
+
+load_dotenv()
 
 logger = setup_logger("db_connection")
 
-DATABASE_URL = os.getenv("AUTH_DATABASE_URL", "postgresql://auth_user:Gl00m17@192.168.88.18/auth_service_db")
+DATABASE_URL = os.getenv("AUTH_DATABASE_URL")
 
 
 # Init Pool
