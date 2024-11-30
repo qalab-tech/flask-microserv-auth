@@ -8,6 +8,7 @@ WORKDIR /app
 # Install all system dependencies, including CMake and other libraries
 RUN apt-get update && apt-get install -y \
     tzdata \
+    curl \
     gcc \
     g++ \
     cmake \
