@@ -22,7 +22,7 @@ def test_login(client):
     assert response.status_code in (200, 401)
 
     if response.status_code == 200:
-        assert 'token' in response.json  # Проверка, что в ответе есть токен
+        assert 'token' in response.json  # Checking if the response contains a token
     else:
         assert response.json.get('message') == 'Invalid credentials'
 
