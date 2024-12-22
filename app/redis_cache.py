@@ -2,16 +2,26 @@
 import redis
 import jwt
 import time
+from app.logger_config import setup_logger
 from app.performance_monitor import log_duration
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
+logger = setup_logger("Redis Cache")
 
+# Loading environment variables depending on the environment
+if os.getenv("ENV") == "docker":
+    load_dotenv(".env.docker")
+else:
+    load_dotenv(".env.local")
 # Radis connection string (we can use a password to improve security)
 
 REDIS_HOST = os.getenv("REDIS_HOST")
 REDIS_PORT = os.getenv("REDIS_PORT")
+
+if REDIS_HOST is None or REDIS_PORT is None:
+    logger.error("REDIS connection is not set in the environment variables, please check the .env.docker file")
+    raise ValueError("REDIS connection is not set in the environment variables.")
 
 cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
 
