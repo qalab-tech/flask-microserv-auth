@@ -2,7 +2,7 @@
 
 from concurrent.futures import ThreadPoolExecutor
 import bcrypt
-from performance_monitor import log_duration, async_log_duration
+from app.performance_monitor import log_duration, async_log_duration
 
 executor = ThreadPoolExecutor(max_workers=4)
 
