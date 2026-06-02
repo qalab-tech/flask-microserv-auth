@@ -23,8 +23,10 @@ def init_test_user():
             )
         """)
 
-        # Удаляем старого тестового пользователя
+        # Удаляем старых тестовых пользователей
         cursor.execute("DELETE FROM users WHERE username = 'test'")
+        cursor.execute("DELETE FROM users WHERE username = 'valid_user'")
+
 
         # Генерируем свежий хеш для пароля "test"
         password_test = "test"
