@@ -2,21 +2,16 @@ import psycopg2
 from psycopg2 import pool
 import os
 from app.logger_config import setup_logger
-from dotenv import load_dotenv
 
 
 logger = setup_logger("db_connection")
 
-# Loading environment variables depending on the environment
-if os.getenv("ENV") == "docker":
-    load_dotenv(".env.docker")
-else:
-    load_dotenv(".env.local")
+
 
 DATABASE_URL = os.getenv("AUTH_DATABASE_URL")
 
 if DATABASE_URL is None:
-    logger.error("AUTH_DB_URL is not set in the environment variables, please check the .env.docker file")
+    logger.error("AUTH_DB_URL is not set in the environment variables")
     raise ValueError("AUTH_DB_URL is not set in the environment variables.")
 
 
