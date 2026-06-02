@@ -1,0 +1,49 @@
+services:
+
+  auth-postgres:
+    image: postgres:16-alpine
+    container_name: auth-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: authdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - auth_postgres_data:/var/lib/postgresql/data
+
+
+  # ================== Redis ==================
+  redis:
+    image: redis:7-alpine
+    container_name: auth-redis
+    restart: always
+    ports:
+      - "3600:6379"
+    volumes:
+      - redis_data:/data
+
+
+  # ================== Auth Service (Flask) ==================
+  auth-service:
+    build: /Users/macbook/PycharmProjects/flask-microserv-auth
+    container_name: auth-service
+    restart: always
+    ports:
+      - "5001:5001"
+    environment:
+      AUTH_DATABASE_URL: postgresql://postgres:postgres@auth-postgres:5432/authdb
+      REDIS_HOST: auth-redis
+      REDIS_PORT: 6379
+      SECRET_KEY: super-secret-jwt-key-change-me-in-production-2026
+#      ENV: development
+#      FLASK_ENV: development
+    depends_on:
+      - auth-postgres
+      - redis
+
+volumes:
+  postgres_data:
+  auth_postgres_data:
+  redis_data:

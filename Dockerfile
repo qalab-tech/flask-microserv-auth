@@ -1,5 +1,5 @@
 # Add the basic Python image
-FROM python:3.11-slim
+FROM python:3.13-slim
 
 
 # Set the working directory
@@ -32,4 +32,5 @@ COPY . .
 EXPOSE 5001
 
 # Run Flask app with Gunicorn
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5001", "app:app"]
+#CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5001", "app:app"]
+CMD ["sh", "-c", "python init_db.py && gunicorn -w 4 -b 0.0.0.0:5001 app:app"]

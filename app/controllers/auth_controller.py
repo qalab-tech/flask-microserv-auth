@@ -7,12 +7,12 @@ from app.repositories.auth_repository import fetch_hashed_password
 import jwt
 from flask_restx import Api, Resource, fields, Namespace
 from app.redis_cache import generate_token, verify_token
-from dotenv import load_dotenv
 
-load_dotenv()
+from config import SECRET_KEY
+
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+app.config['SECRET_KEY'] = SECRET_KEY
 
 logger = setup_logger("auth_controller")
 

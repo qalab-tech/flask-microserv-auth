@@ -1,6 +1,6 @@
-bcrypt<4.0
+bcrypt
 gunicorn
-psycopg2
+psycopg2-binary
 flask
 flask_restx
 prometheus-flask-exporter
