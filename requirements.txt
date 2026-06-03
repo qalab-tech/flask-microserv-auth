@@ -8,4 +8,5 @@ pyjwt
 pytest
 python-dotenv
 redis
+requests
 pydantic[email]

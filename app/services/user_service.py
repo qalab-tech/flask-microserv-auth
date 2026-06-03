@@ -11,13 +11,31 @@ logger = setup_logger("user_service")
 def register_user(username: str, password: str, email: str = None):
     """Регистрация нового пользователя"""
     try:
+        # ========== ВАЛИДАЦИЯ ==========
+        if len(username) < 3:
+            raise ValueError("Username must be at least 3 characters long")
+        if len(password) < 6:  # или 8, как ты хочешь
+            raise ValueError("Password must be at least 6 characters long")
+        if email and '@' not in email:
+            raise ValueError("Invalid email format")
+        # =================================
+
         # Хэшируем пароль
         hashed_password = hash_password(password)
 
         # Создаём пользователя
-        user = create_user(username=username, hashed_password=hashed_password, email=email)
+        user = create_user(
+            username=username,
+            hashed_password=hashed_password,
+            email=email
+        )
+
         logger.info(f"User registered successfully: {username}")
         return user
+
+    except ValueError as ve:
+        logger.error(f"Validation error: {ve}")
+        raise
     except Exception as e:
         logger.error(f"Registration failed for {username}: {e}")
         raise
