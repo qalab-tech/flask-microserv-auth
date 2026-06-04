@@ -12,6 +12,12 @@ services:
     volumes:
       - auth_postgres_data:/var/lib/postgresql/data
       - ./auth-migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 8
+      start_period: 10s
 
   redis:
     image: redis:7-alpine
@@ -21,6 +27,11 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   auth-service:
     build: /Users/macbook/PycharmProjects/flask-microserv-auth
@@ -36,15 +47,19 @@ services:
       JWT_ACCESS_TOKEN_EXPIRES: 3600
       ENV: docker
     depends_on:
-      - auth-postgres
-      - redis
-#    healthcheck:
-#      test: ["CMD", "curl", "-f", "http://localhost:5001/auth/validate"]
-#      interval: 10s
-#      timeout: 5s
-#      retries: 8
-#      start_period: 15s
+      auth-postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/users/users"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
 
 volumes:
   auth_postgres_data:
   redis_data:
+
+# JWT_ACCESS_TOKEN_EXPIRES: 3600
