@@ -9,9 +9,11 @@ def create_app():
     # Register Blueprints
     from app.controllers.auth_controller import auth_bp
     from app.controllers.users_controller import users_bp
+    from app.controllers.health_controller import health_bp
 
     app.register_blueprint(auth_bp, url_prefix='/')
     app.register_blueprint(users_bp, url_prefix='/')
+    app.register_blueprint(health_bp, url_prefix='/')
 
     return app
 
