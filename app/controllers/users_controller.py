@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from flask_restx import Api, Resource, fields, Namespace
+from flask_restx import Resource, fields, Namespace
 from app.services.user_service import (
     register_user, get_user_profile, get_users_list,
     update_user_profile, remove_user
