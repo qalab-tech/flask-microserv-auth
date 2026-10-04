@@ -40,6 +40,10 @@ def decode_token(token: str) -> dict:
     try:
         claims = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM], options={"require": REQUIRED_CLAIMS})
         user_id = int(claims["sub"])
+        # PyJWT accepts numeric strings/floats for iat and exp; we only issue integers.
+        for name in ("iat", "exp"):
+            if not isinstance(claims[name], int) or isinstance(claims[name], bool):
+                raise TokenInvalid()
     except jwt.ExpiredSignatureError as e:
         raise TokenExpired() from e
     except (jwt.InvalidTokenError, ValueError) as e:

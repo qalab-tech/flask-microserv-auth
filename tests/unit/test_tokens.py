@@ -43,6 +43,19 @@ def test_invalid_tokens_are_rejected(fake_redis, forge_token, overrides):
         tokens.decode_token(forge_token(**overrides))
 
 
+@pytest.mark.parametrize("overrides", [
+    {"iat": "1"},
+    {"iat": 1.5},
+    {"exp": "9999999999"},
+    {"exp": 9999999999.5},
+], ids=["string-iat", "float-iat", "string-exp", "float-exp"])
+def test_non_integer_timestamps_are_rejected(fake_redis, forge_token, clock, overrides):
+    tokens.revoke_all_for_user(1)  # makes decode_token compare iat with valid_after
+
+    with pytest.raises(TokenInvalid):
+        tokens.decode_token(forge_token(**overrides))
+
+
 def test_garbage_is_rejected(fake_redis):
     with pytest.raises(TokenInvalid):
         tokens.decode_token("not-a-jwt")
