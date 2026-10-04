@@ -34,7 +34,7 @@
 4. Тело — валидный JSON, но не объект (`[]`, `"str"`): ожидается 400, а не 500 на `.get` → Task 2 (`test_parse_body_rejects_non_object_body`), Task 4, Task 5.
 5. `PUT` с `{"email": null, "password": null}`: ожидается 400, а не 404 «User not found» → Task 2 (`test_update_rejects_all_null_fields`), Task 5 (`test_update_rejects_invalid_payload`).
 
-## Отклонения от спецификации (согласовать с пользователем)
+## Отклонения от спецификации (согласованы 2026-10-04, внесены в спеку, раздел 8)
 
 - flask-restx всегда добавляет `message` в тело ошибки (`default_data.get("message", str(e))`). Поэтому 401 на `/auth/validate` и `/auth/logout` — `{"message":"Unauthorized","status":"..."}`, а не только `{"status":"..."}`. Форма совместима: поле `status` на месте. Строки таблицы ошибок для `AuthError` объединяются в одну.
 - Минимальная длина пароля — 6 **символов** (в спецификации «6–72 байта»), максимальная — 72 **байта**. Иначе пароль из трёх кириллических букв (6 байт) проходил бы проверку.
