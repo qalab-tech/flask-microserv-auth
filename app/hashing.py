@@ -4,6 +4,9 @@ from concurrent.futures import ThreadPoolExecutor
 import bcrypt
 from app.performance_monitor import log_duration, async_log_duration
 
+# bcrypt only looks at the first 72 bytes of a password; bcrypt >= 5 raises on longer input.
+BCRYPT_MAX_BYTES = 72
+
 executor = ThreadPoolExecutor(max_workers=4)
 
 

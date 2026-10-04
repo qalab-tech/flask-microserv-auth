@@ -3,6 +3,7 @@ from prometheus_flask_exporter import PrometheusMetrics
 
 def create_app():
     app = Flask(__name__)
+    app.config["RESTX_ERROR_404_HELP"] = False
     app.url_map.strict_slashes = False
     PrometheusMetrics(app, group_by='endpoint')
 
