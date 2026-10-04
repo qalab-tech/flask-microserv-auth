@@ -27,4 +27,13 @@ def _hash_sync(password: str) -> str:
 @log_duration
 def check_password(password: str, hashed_password: str) -> bool:
     """Compare password with a hashed value"""
-    return bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8'))
+    password_bytes = password.encode('utf-8')
+    if len(password_bytes) > BCRYPT_MAX_BYTES:
+        # Registration never accepts such passwords, and bcrypt >= 5 would raise ValueError.
+        return False
+    return bcrypt.checkpw(password_bytes, hashed_password.encode('utf-8'))
+
+
+# Hash of a throwaway password: logins for unknown usernames are checked against it,
+# so they take as long as logins for existing ones.
+DUMMY_HASH = bcrypt.hashpw(b"dummy-password-for-timing-equalization", bcrypt.gensalt()).decode('utf-8')
