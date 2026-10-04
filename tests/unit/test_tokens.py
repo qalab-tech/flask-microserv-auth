@@ -1,3 +1,4 @@
+import jwt
 import pytest
 
 import config
@@ -56,6 +57,17 @@ def test_non_integer_timestamps_are_rejected(fake_redis, forge_token, clock, ove
         tokens.decode_token(forge_token(**overrides))
 
 
+@pytest.mark.filterwarnings("ignore:The HMAC key is:Warning")
+def test_unsigned_and_hs512_tokens_are_rejected(fake_redis, clock):
+    claims = {"sub": "1", "username": "alice", "iat": clock.now, "exp": clock.now + 600, "jti": "f" * 32}
+    unsigned = jwt.encode(claims, None, algorithm="none")
+    hs512 = jwt.encode(claims, config.SECRET_KEY, algorithm="HS512")
+
+    for token in (unsigned, hs512):
+        with pytest.raises(TokenInvalid):
+            tokens.decode_token(token)
+
+
 def test_garbage_is_rejected(fake_redis):
     with pytest.raises(TokenInvalid):
         tokens.decode_token("not-a-jwt")
@@ -100,6 +112,21 @@ def test_revoke_all_keeps_tokens_issued_in_the_same_second(fake_redis, clock):
     fresh = tokens.issue_token(1, "alice")
 
     assert tokens.decode_token(fresh)["sub"] == "1"
+
+
+def test_revoke_all_inclusive_rejects_tokens_issued_in_the_same_second(fake_redis, clock):
+    same_second = tokens.issue_token(1, "alice")
+    tokens.revoke_all_for_user(1, include_current_second=True)
+
+    with pytest.raises(TokenRevoked):
+        tokens.decode_token(same_second)
+    clock.advance(1)
+    assert tokens.decode_token(tokens.issue_token(1, "alice"))["sub"] == "1"
+
+
+def test_revoke_all_inclusive_key_still_covers_every_earlier_token(fake_redis, clock):
+    tokens.revoke_all_for_user(1, include_current_second=True)
+    assert 0 < fake_redis.ttl("valid_after:1") <= config.JWT_ACCESS_TOKEN_EXPIRES + 1
 
 
 def test_revoke_all_affects_only_that_user(fake_redis, clock):

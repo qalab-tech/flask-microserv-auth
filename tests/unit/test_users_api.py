@@ -37,6 +37,8 @@ def test_register_duplicate_returns_409_without_db_details(client, make_user):
     ({"username": "alice", "password": "12345"}, "password"),
     ({"username": "alice", "password": "я" * 37}, "password"),
     ({"username": "alice", "password": "secret123", "email": "not-an-email"}, "email"),
+    ({"username": "a\u0000bc", "password": "secret123"}, "username"),
+    ({"username": "alice", "password": "secret123", "email": "a" * 90 + "@example.com"}, "email"),
 ])
 def test_register_rejects_invalid_payload(client, payload, field):
     resp = client.post("/users/register", json=payload)
@@ -83,6 +85,7 @@ def test_me_returns_own_profile(client, make_user):
         "email": "alice@example.com",
         "created_at": "2026-01-01T12:00:00",
     }
+    assert "hashed_password" not in resp.json
 
 
 def test_list_users_for_authenticated_user(client, make_user):
@@ -103,6 +106,7 @@ def test_get_own_user(client, make_user):
 
     assert resp.status_code == 200
     assert resp.json["id"] == user["id"]
+    assert "hashed_password" not in resp.json
 
 
 @pytest.mark.parametrize("method, path, json", [
@@ -190,6 +194,31 @@ def test_update_rejects_invalid_payload(client, make_user, payload):
     assert resp.json["message"] == "Validation failed"
 
 
+def test_update_rejects_over_long_email(client, make_user):
+    user = make_user()
+    resp = client.put(f"/users/users/{user['id']}", headers=user["headers"],
+                      json={"email": "a" * 90 + "@example.com"})
+
+    assert resp.status_code == 400
+    assert "email" in [e["field"] for e in resp.json["errors"]]
+
+
+def test_password_change_retry_after_503_revokes_old_tokens(client, make_user, clock, break_redis):
+    user = make_user()
+    clock.advance(5)
+    restore = break_redis(writes_only=True)
+    url = f"/users/users/{user['id']}"
+    body = {"password": "newsecret1"}
+
+    assert client.put(url, headers=user["headers"], json=body).status_code == 503
+    restore()
+    assert client.put(url, headers=user["headers"], json=body).status_code == 200
+
+    old = client.get("/auth/validate", headers=user["headers"])
+    assert old.status_code == 401
+    assert old.json["status"] == "revoked"
+
+
 def test_password_change_with_redis_down_returns_503(client, make_user, clock, break_redis):
     user = make_user()
     clock.advance(5)
@@ -216,6 +245,16 @@ def test_delete_own_user_revokes_tokens(client, make_user, clock, repo):
     old = client.get("/auth/validate", headers=user["headers"])
     assert old.status_code == 401
     assert old.json["status"] == "revoked"
+
+
+def test_delete_revokes_token_issued_in_the_same_second(client, make_user, repo):
+    user = make_user()  # no clock advance: token iat == delete second
+
+    assert client.delete(f"/users/users/{user['id']}", headers=user["headers"]).status_code == 200
+
+    resp = client.get("/auth/validate", headers=user["headers"])
+    assert resp.status_code == 401
+    assert resp.json["status"] == "revoked"
 
 
 def test_delete_with_redis_down_keeps_user(client, make_user, clock, repo, break_redis):

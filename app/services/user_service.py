@@ -18,7 +18,7 @@ def register_user(data: UserRegister) -> dict:
         hashed_password=hash_password(data.password),
         email=data.email
     )
-    logger.info(f"User registered successfully: {data.username}")
+    logger.info("User registered successfully: %r", data.username)
     return user
 
 
@@ -50,6 +50,6 @@ def update_user_profile(user_id: int, data: UserUpdate) -> dict:
 def remove_user(user_id: int) -> None:
     """Удаление пользователя; токены отзываются до удаления"""
     # Revoke first: if Redis is down, the user is not deleted and no live tokens are left behind.
-    revoke_all_for_user(user_id)
+    revoke_all_for_user(user_id, include_current_second=True)
     if not delete_user(user_id):
         raise UserNotFound()

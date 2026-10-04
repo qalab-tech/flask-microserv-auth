@@ -115,6 +115,24 @@ def test_validate_rejects_forged_tokens(client, forge_token, overrides):
     assert resp.json["status"] == "invalid"
 
 
+@pytest.mark.filterwarnings("ignore:The HMAC key is:Warning")
+def test_validate_rejects_unsigned_and_hs512_tokens(client, clock):
+    claims = {"sub": "1", "username": "alice", "iat": clock.now, "exp": clock.now + 600, "jti": "f" * 32}
+    for token in (jwt.encode(claims, None, algorithm="none"),
+                  jwt.encode(claims, config.SECRET_KEY, algorithm="HS512")):
+        resp = _validate(client, token)
+
+        assert resp.status_code == 401
+        assert resp.json["status"] == "invalid"
+
+
+def test_login_rejects_nul_in_username_with_400(client):
+    resp = client.post("/auth/login", json={"username": "a\u0000bc", "password": "secret123"})
+
+    assert resp.status_code == 400
+    assert "username" in [e["field"] for e in resp.json["errors"]]
+
+
 def test_validate_reports_expired_token(client, make_user, clock):
     clock.now -= config.JWT_ACCESS_TOKEN_EXPIRES + 10
     user = make_user()  # logged in long ago, so the token is already expired

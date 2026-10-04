@@ -72,3 +72,30 @@ def test_update_rejects_invalid_fields(payload):
 def test_login_requires_non_empty_strings(payload):
     with pytest.raises(ValidationError):
         LoginRequest.model_validate(payload)
+
+
+def test_register_and_login_reject_nul_in_username():
+    with pytest.raises(ValidationError) as exc_info:
+        UserRegister(username="a\x00bc", password="secret123")
+    assert "username" in _error_fields(exc_info)
+    with pytest.raises(ValidationError) as exc_info:
+        LoginRequest(username="a\x00bc", password="x")
+    assert "username" in _error_fields(exc_info)
+
+
+def _email(length):
+    return "a" * (length - len("@example.com")) + "@example.com"
+
+
+def test_email_of_exactly_100_chars_is_accepted():
+    assert UserRegister(username="alice", password="secret123", email=_email(100)).email == _email(100)
+    assert UserUpdate(email=_email(100)).email == _email(100)
+
+
+def test_email_over_100_chars_is_rejected():
+    with pytest.raises(ValidationError) as exc_info:
+        UserRegister(username="alice", password="secret123", email=_email(101))
+    assert "email" in _error_fields(exc_info)
+    with pytest.raises(ValidationError) as exc_info:
+        UserUpdate(email=_email(101))
+    assert "email" in _error_fields(exc_info)
