@@ -1,4 +1,4 @@
-.PHONY: up down build logs test test-positive test-negative shell db-shell redis-shell fresh help
+.PHONY: up down build logs test test-unit test-positive test-negative shell db-shell redis-shell fresh help
 
 # ================== Основные команды ==================
 
@@ -20,13 +20,16 @@ fresh:
 # ================== Тесты ==================
 
 test:
-	docker-compose exec auth-service pytest tests/ -v --tb=short
+	docker-compose exec auth-service pytest tests/unit tests/integration -v --tb=short
+
+test-unit:
+	pytest tests/unit -v --tb=short
 
 test-positive:
-	docker-compose exec auth-service pytest tests/test_users_positive_cases.py -v --tb=short
+	docker-compose exec auth-service pytest tests/integration/test_users_positive_cases.py -v --tb=short
 
 test-negative:
-	docker-compose exec auth-service pytest tests/test_users_negative_cases.py -v --tb=short
+	docker-compose exec auth-service pytest tests/integration/test_users_negative_cases.py -v --tb=short
 
 # ================== Доступ к контейнерам ==================
 
@@ -64,6 +67,7 @@ help:
 	@echo ""
 	@echo "=== Тесты ==="
 	@echo "  make test            - Запустить все тесты"
+	@echo "  make test-unit       - Unit-тесты локально, без Docker"
 	@echo "  make test-positive   - Только позитивные тесты"
 	@echo "  make test-negative   - Только негативные тесты"
 	@echo ""
