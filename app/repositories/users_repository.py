@@ -43,6 +43,18 @@ def get_user_by_id(user_id: int):
 
 
 @log_duration
+def get_user_credentials(username: str):
+    connection = get_db_connection()
+    cursor = connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    try:
+        cursor.execute("SELECT id, username, hashed_password FROM users WHERE username = %s", (username,))
+        return cursor.fetchone()
+    finally:
+        cursor.close()
+        release_db_connection(connection)
+
+
+@log_duration
 def get_all_users(limit: int = 50, offset: int = 0):
     connection = get_db_connection()
     cursor = connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
