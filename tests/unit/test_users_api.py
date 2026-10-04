@@ -219,7 +219,7 @@ def test_password_change_retry_after_503_revokes_old_tokens(client, make_user, c
     assert old.json["status"] == "revoked"
 
 
-def test_password_change_with_redis_down_returns_503(client, make_user, clock, break_redis):
+def test_password_change_with_redis_down_changes_nothing(client, make_user, clock, break_redis):
     user = make_user()
     clock.advance(5)
     break_redis(writes_only=True)
@@ -227,8 +227,10 @@ def test_password_change_with_redis_down_returns_503(client, make_user, clock, b
     resp = client.put(f"/users/users/{user['id']}", headers=user["headers"], json={"password": "newsecret1"})
 
     assert resp.status_code == 503
-    # The password is already changed in the DB; retrying the request completes the revocation.
-    assert _login(client, "alice", "newsecret1").status_code == 200
+    assert resp.json == {"message": "Service temporarily unavailable"}
+    # Tokens are revoked before the DB write, so a Redis outage leaves the old password in place.
+    assert _login(client, "alice", "secret123").status_code == 200
+    assert _login(client, "alice", "newsecret1").status_code == 401
 
 
 # ---------- delete ----------
