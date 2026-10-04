@@ -1,12 +1,14 @@
 bcrypt
-gunicorn
-psycopg2-binary
+email-validator
+fakeredis
 flask
 flask_restx
+gunicorn
 prometheus-flask-exporter
+psycopg2-binary
+pydantic
 pyjwt
 pytest
 python-dotenv
 redis
 requests
-pydantic[email]
