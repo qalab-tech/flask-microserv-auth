@@ -751,7 +751,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>" -- app/errors.py app/va
   - `app.tokens.revoke_token(claims: dict) -> None`; `app.tokens.revoke_all_for_user(user_id: int) -> None` — оба бросают `ServiceUnavailable`.
   - Фикстуры в `tests/unit/conftest.py`: `redis_server`, `fake_redis`, `break_redis` (вызов `break_redis()` или `break_redis(writes_only=True)`), `clock` (`.now: int`, `.advance(seconds)`), `forge_token(key=None, **overrides) -> str`.
 
-- [ ] **Step 1: Создать `tests/unit/conftest.py` с фикстурами**
+- [x] **Step 1: Создать `tests/unit/conftest.py` с фикстурами**
 
 ```python
 import time
@@ -830,7 +830,7 @@ def forge_token(clock):
     return _forge
 ```
 
-- [ ] **Step 2: Написать падающие тесты**
+- [x] **Step 2: Написать падающие тесты**
 
 `tests/unit/test_tokens.py`:
 ```python
@@ -954,12 +954,12 @@ def test_revocations_report_redis_outage(clock, break_redis):
         tokens.revoke_all_for_user(1)
 ```
 
-- [ ] **Step 3: Убедиться, что тесты падают**
+- [x] **Step 3: Убедиться, что тесты падают**
 
 Run: `.venv/bin/python -m pytest tests/unit/test_tokens.py -q`
 Expected: ERROR — `ImportError: cannot import name 'tokens' from 'app'`.
 
-- [ ] **Step 4: Реализовать `app/tokens.py`**
+- [x] **Step 4: Реализовать `app/tokens.py`**
 
 ```python
 """JWT access tokens: issuing, verification and revocation (revocation state lives in Redis)."""
@@ -1038,12 +1038,12 @@ def revoke_all_for_user(user_id: int) -> None:
         raise ServiceUnavailable() from e
 ```
 
-- [ ] **Step 5: Убедиться, что тесты проходят**
+- [x] **Step 5: Убедиться, что тесты проходят**
 
 Run: `.venv/bin/python -m pytest tests/unit -q`
 Expected: PASS, все тесты зелёные.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add app/tokens.py tests/unit/conftest.py tests/unit/test_tokens.py
