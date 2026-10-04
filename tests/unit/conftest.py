@@ -55,10 +55,17 @@ def fake_redis(monkeypatch, redis_server):
 
 @pytest.fixture
 def break_redis(monkeypatch, redis_server):
-    """Call break_redis() to fail every Redis command, break_redis(writes_only=True) to fail only writes."""
-    def _break(writes_only: bool = False) -> None:
+    """Call break_redis() to fail every Redis command, break_redis(writes_only=True) to fail only writes.
+    The call returns a function that restores the previous client."""
+    def _break(writes_only: bool = False):
+        """Returns a callable that restores a working Redis."""
+        healthy = tokens.redis_client
         client = ReadOnlyRedis(server=redis_server, decode_responses=True) if writes_only else BrokenRedis()
         monkeypatch.setattr(tokens, "redis_client", client)
+
+        def restore() -> None:
+            monkeypatch.setattr(tokens, "redis_client", healthy)
+        return restore
     return _break
 
 

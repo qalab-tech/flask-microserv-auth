@@ -55,7 +55,7 @@ class Login(Resource):
         hashed_password = user["hashed_password"] if user else DUMMY_HASH
         password_ok = check_password(body.password, hashed_password)
         if user is None or not password_ok:
-            logger.warning(f"Invalid credentials for username '{body.username}'")
+            logger.warning("Invalid credentials for username %r", body.username)
             raise InvalidCredentials()
         return {"token": issue_token(user["id"], user["username"])}, 200
 

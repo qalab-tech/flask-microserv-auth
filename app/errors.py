@@ -87,6 +87,6 @@ def register_error_handlers(api) -> None:
         if isinstance(e, HTTPException):
             # Keep protocol headers (e.g. Allow on 405); the body is JSON, so drop Content-Type.
             headers = {k: v for k, v in e.get_headers() if k.lower() != "content-type"}
-            return {"message": e.description}, e.code, headers
+            return {"message": e.description}, e.code or 500, headers
         # flask-restx logs the traceback for 5xx responses; the client gets no details.
         return {"message": "Internal server error"}, 500

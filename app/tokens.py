@@ -70,9 +70,15 @@ def revoke_token(claims: dict) -> None:
         raise ServiceUnavailable() from e
 
 
-def revoke_all_for_user(user_id: int) -> None:
-    """Revoke every token of the user issued before now (password change, deletion)."""
+def revoke_all_for_user(user_id: int, include_current_second: bool = False) -> None:
+    """Revoke every token of the user issued before now (password change).
+
+    With include_current_second=True (account deletion) tokens issued in the current second are revoked too.
+    """
+    extra = 1 if include_current_second else 0
     try:
-        redis_client.set(f"valid_after:{user_id}", _now(), ex=JWT_ACCESS_TOKEN_EXPIRES)
+        # valid_after is `extra` seconds in the future, so the key lives `extra` seconds longer
+        # to still cover every token issued before it.
+        redis_client.set(f"valid_after:{user_id}", _now() + extra, ex=JWT_ACCESS_TOKEN_EXPIRES + extra)
     except redis.RedisError as e:
         raise ServiceUnavailable() from e

@@ -1,7 +1,7 @@
 import pytest
 from flask import Flask
 from flask_restx import Api, Resource
-from werkzeug.exceptions import MethodNotAllowed, NotFound
+from werkzeug.exceptions import HTTPException, MethodNotAllowed, NotFound
 
 from app.errors import (
     Forbidden, InvalidCredentials, RequestValidationError, ServiceUnavailable,
@@ -55,3 +55,9 @@ def test_http_exceptions_keep_their_headers():
     assert resp.status_code == 405
     allow = resp.headers["Allow"]
     assert "GET" in allow and "POST" in allow
+
+
+def test_http_exception_without_code_returns_500():
+    resp = _client_raising(HTTPException()).get("/boom")
+    assert resp.status_code == 500
+    assert "message" in resp.json

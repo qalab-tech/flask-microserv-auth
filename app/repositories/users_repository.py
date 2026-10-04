@@ -22,15 +22,15 @@ def create_user(username: str, hashed_password: str, email: str = None):
 
         user = cursor.fetchone()
         connection.commit()
-        logger.info(f"User created: {username}")
+        logger.info("User created: %r", username)
         return user
     except pg_errors.UniqueViolation as e:
         connection.rollback()
-        logger.warning(f"Username already taken: {username}")
+        logger.warning("Username already taken: %r", username)
         raise UserAlreadyExists() from e
     except Exception as e:
         connection.rollback()
-        logger.error(f"Error creating user {username}: {e}")
+        logger.error("Error creating user %r: %s", username, e)
         raise
     finally:
         cursor.close()
