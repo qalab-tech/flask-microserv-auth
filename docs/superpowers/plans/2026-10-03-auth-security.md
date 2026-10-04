@@ -352,7 +352,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>" -- requirements.txt con
   - `app.schemas.user_schemas`: `UserRegister(username, email, password)`, `UserUpdate(email, password)`, `LoginRequest(username, password)`.
   - `app.hashing.BCRYPT_MAX_BYTES = 72`.
 
-- [ ] **Step 1: Написать падающие тесты схем**
+- [x] **Step 1: Написать падающие тесты схем**
 
 `tests/unit/test_schemas.py`:
 ```python
@@ -431,7 +431,7 @@ def test_login_requires_non_empty_strings(payload):
         LoginRequest.model_validate(payload)
 ```
 
-- [ ] **Step 2: Написать падающие тесты `parse_body`**
+- [x] **Step 2: Написать падающие тесты `parse_body`**
 
 `tests/unit/test_validation.py`:
 ```python
@@ -482,7 +482,7 @@ def test_parse_body_reports_model_level_errors_as_body():
     assert [d["field"] for d in exc_info.value.details] == ["body"]
 ```
 
-- [ ] **Step 3: Написать падающие тесты обработчика ошибок**
+- [x] **Step 3: Написать падающие тесты обработчика ошибок**
 
 `tests/unit/test_error_handlers.py`:
 ```python
@@ -537,12 +537,12 @@ def test_http_exceptions_keep_their_status():
     assert resp.status_code == 404
 ```
 
-- [ ] **Step 4: Убедиться, что тесты падают**
+- [x] **Step 4: Убедиться, что тесты падают**
 
 Run: `.venv/bin/python -m pytest tests/unit/test_schemas.py tests/unit/test_validation.py tests/unit/test_error_handlers.py -q`
 Expected: ERROR при коллекции — `ModuleNotFoundError: No module named 'app.errors'` / `ImportError: cannot import name 'LoginRequest'`.
 
-- [ ] **Step 5: Добавить константу в `app/hashing.py`**
+- [x] **Step 5: Добавить константу в `app/hashing.py`**
 
 После строки `from app.performance_monitor import log_duration, async_log_duration` вставить:
 ```python
@@ -551,7 +551,7 @@ Expected: ERROR при коллекции — `ModuleNotFoundError: No module na
 BCRYPT_MAX_BYTES = 72
 ```
 
-- [ ] **Step 6: Создать `app/errors.py`**
+- [x] **Step 6: Создать `app/errors.py`**
 
 ```python
 """Domain exceptions and the single place that turns them into HTTP responses."""
@@ -646,7 +646,7 @@ def register_error_handlers(api) -> None:
         return {"message": "Internal server error"}, 500
 ```
 
-- [ ] **Step 7: Создать `app/validation.py`**
+- [x] **Step 7: Создать `app/validation.py`**
 
 ```python
 from typing import TypeVar
@@ -674,7 +674,7 @@ def parse_body(model: type[ModelT]) -> ModelT:
         raise RequestValidationError(details) from e
 ```
 
-- [ ] **Step 8: Переписать `app/schemas/user_schemas.py`**
+- [x] **Step 8: Переписать `app/schemas/user_schemas.py`**
 
 ```python
 from typing import Annotated
@@ -716,12 +716,12 @@ class LoginRequest(BaseModel):
     password: str = Field(min_length=1)
 ```
 
-- [ ] **Step 9: Убедиться, что тесты проходят**
+- [x] **Step 9: Убедиться, что тесты проходят**
 
 Run: `.venv/bin/python -m pytest tests/unit -q`
 Expected: PASS, все тесты Task 1 и Task 2 зелёные.
 
-- [ ] **Step 10: Commit**
+- [x] **Step 10: Commit**
 
 ```bash
 git add app/errors.py app/validation.py app/schemas/user_schemas.py app/hashing.py tests/unit/test_schemas.py tests/unit/test_validation.py tests/unit/test_error_handlers.py
