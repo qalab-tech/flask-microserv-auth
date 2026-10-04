@@ -1,7 +1,7 @@
 # Безопасность и авторизация auth-service — дизайн
 
 - **Дата:** 2026-10-03
-- **Статус:** утверждён в чате, ожидает ревью спецификации
+- **Статус:** утверждён; отклонения из плана согласованы 2026-10-04 (раздел 8)
 - **Кусок:** 1 из 4 по итогам аудита (безопасность и авторизация)
 
 ## 1. Контекст и цель
@@ -54,16 +54,17 @@
 - `ensure_owner(user_id: int)` бросает `Forbidden`, если `user_id != g.current_user["id"]`.
 
 **`app/errors.py`**
-- Доменные исключения: `UserNotFound`, `UserAlreadyExists`, `Forbidden`, `AuthError(status)` (status ∈ `missing`, `invalid`, `expired`, `revoked`), `ServiceUnavailable`. Исключения токенов (`TokenExpired`, `TokenInvalid`, `TokenRevoked`) — подклассы `AuthError`.
+- Доменные исключения: `UserNotFound`, `UserAlreadyExists`, `Forbidden`, `AuthError` с подклассами `TokenMissing`, `TokenInvalid`, `TokenExpired`, `TokenRevoked` (у каждого атрибут класса `status` ∈ `missing`, `invalid`, `expired`, `revoked`), `ServiceUnavailable`.
 - Функция `register_error_handlers(api)` регистрирует обработчики на общем `Api` flask-restx (раздел 5).
 
 ### 3.2 Изменения существующих модулей
 
-- **`config.py`** — проверка при импорте: нет `SECRET_KEY` или он короче 32 символов → `RuntimeError`. `JWT_ACCESS_TOKEN_EXPIRES` приводится к `int`, по умолчанию 3600. Новый флаг `SEED_TEST_USERS` (bool, по умолчанию `false`). Неиспользуемый `JWT_REFRESH_TOKEN_EXPIRES` удаляется.
+- **`config.py`** — проверка при импорте: нет `SECRET_KEY` или он короче 32 символов → `RuntimeError`. `JWT_ACCESS_TOKEN_EXPIRES` приводится к `int`, по умолчанию 3600. Новый флаг `SEED_TEST_USERS` (bool, по умолчанию `false`). Неиспользуемый `JWT_REFRESH_TOKEN_EXPIRES` удаляется. `REDIS_HOST`/`REDIS_PORT` по умолчанию `localhost`/`6379`.
 - **`app/schemas/user_schemas.py`** — схемы начинают использоваться для валидации тел запросов:
-  - `UserRegister`: username 3–50, email `EmailStr | None`, password 6–72 **байта** в UTF-8;
+  - `UserRegister`: username 3–50, email `EmailStr | None`, password от 6 **символов** до 72 **байт** в UTF-8;
   - `UserUpdate`: email и password опциональны с теми же правилами; хотя бы одно поле обязательно;
-  - `LoginRequest` (новая): username и password — непустые строки.
+  - `LoginRequest` (новая): username и password — непустые строки;
+  - неиспользуемые `UserResponse`/`UserListResponse` удаляются.
 - **`app/services/user_service.py`** — ручная валидация удаляется (её заменяет pydantic). Вместо `ValueError` бросаются `UserNotFound`. При смене пароля и удалении сервис вызывает отзыв токенов (раздел 4.2).
 - **`app/repositories/users_repository.py`** — `psycopg2.errors.UniqueViolation` превращается в `UserAlreadyExists`. Добавляется `get_user_credentials(username)` → `{id, username, hashed_password} | None` для логина; `app/repositories/auth_repository.py` удаляется.
 - **`app/controllers/auth_controller.py`** — второй экземпляр `Flask(__name__)` удаляется. Логин использует `hashing.check_password`; если пользователь не найден, проверка выполняется с фиктивным bcrypt-хэшем (защита от определения логинов по времени ответа). Добавляется `POST /auth/logout`.
@@ -80,7 +81,7 @@
 | Метод и путь | Доступ | Успех | Ошибки |
 |---|---|---|---|
 | `POST /auth/login` | публично | 200 `{"token"}` | 400 тело невалидно; 401 `{"message":"Invalid credentials"}` |
-| `GET /auth/validate` | Bearer | 200 `{"status":"valid","user":"<username>","user_id":<id>}` | 401 `{"status":"missing"\|"invalid"\|"expired"\|"revoked"}`; 503 |
+| `GET /auth/validate` | Bearer | 200 `{"status":"valid","user":"<username>","user_id":<id>}` | 401 `{"message":"Unauthorized","status":"missing"\|"invalid"\|"expired"\|"revoked"}`; 503 |
 | `POST /auth/logout` *(новый)* | Bearer | 204 | 401 как у `/validate`; 503 |
 | `POST /users/register` | публично | 201 `{"message","user_id"}` | 400 валидация; 409 логин занят |
 | `GET /users/me` *(новый)* | Bearer | 200 профиль | 401; 503 |
@@ -121,7 +122,7 @@
 
 ### 4.3 Изменения, которые затрагивают вызывающих
 
-1. Если заголовка `Authorization` нет, `/auth/validate` отвечает 401 `{"status":"missing"}` вместо 403.
+1. Если заголовка `Authorization` нет, `/auth/validate` отвечает 401 `{"message":"Unauthorized","status":"missing"}` вместо 403.
 2. `/users/*` (кроме регистрации) требует Bearer-токен.
 3. После смены пароля или удаления все токены пользователя, включая текущий, недействительны.
 4. Для несуществующего пользователя (своего id) `PUT` и `DELETE` отвечают 404, а не 400.
@@ -141,8 +142,7 @@
 | Исключение | Статус | Тело |
 |---|---|---|
 | `pydantic.ValidationError`, тело не JSON или не объект | 400 | `{"message":"Validation failed","errors":[...]}` |
-| `AuthError` на `/auth/validate`, `/auth/logout` | 401 | `{"status":"<status>"}` |
-| `AuthError` на остальных эндпоинтах | 401 | `{"message":"Unauthorized","status":"<status>"}` |
+| `AuthError` (любой эндпоинт) | 401 | `{"message":"Unauthorized","status":"<status>"}` |
 | неверные логин или пароль | 401 | `{"message":"Invalid credentials"}` |
 | `Forbidden` | 403 | `{"message":"Forbidden"}` |
 | `UserNotFound` | 404 | `{"message":"User not found"}` |
@@ -207,3 +207,13 @@
 - `test_login` (принимает и 200, и 401) переписывается на два точных кейса;
 - `test_register_invalid_email` ждёт строго 400;
 - `test_register_duplicate_username` использует уникальное имя, ждёт 409 и удаляет пользователя после теста.
+
+## 8. Согласованные отклонения (2026-10-04)
+
+- Тело 401 всегда содержит `message` (flask-restx добавляет его сам): `{"message":"Unauthorized","status":"..."}`. Поле `status` сохраняется, контракт с albums совместим.
+- Пароль: минимум 6 символов, максимум 72 байта в UTF-8.
+- `AuthError(status)` заменён подклассами `TokenMissing`/`TokenInvalid`/`TokenExpired`/`TokenRevoked`.
+- Неиспользуемые `UserResponse`/`UserListResponse` удаляются.
+- В Swagger добавляется схема `Bearer` (кнопка Authorize).
+- `REDIS_HOST`/`REDIS_PORT` по умолчанию `localhost`/`6379`. Забытая переменная в проде проявится как 503 (fail-closed), а не как падение при старте — осознанный компромисс ради запуска unit-тестов без Docker.
+- `Makefile`: пути тестов обновляются, добавляется `make test-unit`.
