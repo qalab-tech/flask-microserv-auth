@@ -1074,7 +1074,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>" -- app/tokens.py tests/
   - `app.controllers.auth_controller.auth_api` (с зарегистрированными обработчиками ошибок);
   - фикстуры: `repo` (экземпляр `FakeUserRepo`, атрибут `.users: dict[int, dict]`), `client`, `make_user(username="alice", password="secret123", email=None) -> {"id","username","password","token","headers"}`.
 
-- [ ] **Step 1: Дописать фикстуры в `tests/unit/conftest.py`**
+- [x] **Step 1: Дописать фикстуры в `tests/unit/conftest.py`**
 
 Добавить к импортам в начале файла:
 ```python
@@ -1181,7 +1181,7 @@ def make_user(client):
     return _make
 ```
 
-- [ ] **Step 2: Написать падающие тесты хэширования**
+- [x] **Step 2: Написать падающие тесты хэширования**
 
 `tests/unit/test_hashing.py`:
 ```python
@@ -1212,7 +1212,7 @@ def test_dummy_hash_is_a_full_cost_bcrypt_hash():
     assert check_password("secret123", DUMMY_HASH) is False
 ```
 
-- [ ] **Step 3: Написать падающие API-тесты авторизации**
+- [x] **Step 3: Написать падающие API-тесты авторизации**
 
 `tests/unit/test_auth_api.py`:
 ```python
@@ -1373,12 +1373,12 @@ def test_logout_requires_token(client):
     assert resp.json["status"] == "missing"
 ```
 
-- [ ] **Step 4: Убедиться, что тесты падают**
+- [x] **Step 4: Убедиться, что тесты падают**
 
 Run: `.venv/bin/python -m pytest tests/unit/test_hashing.py tests/unit/test_auth_api.py -q`
 Expected: FAIL / ERROR — `ImportError: cannot import name 'DUMMY_HASH'`; после его появления — падения API-тестов (`AttributeError: module ... has no attribute 'get_user_credentials'` в фикстуре `repo`, 403 вместо 401, 500 на кривом теле и т. п.).
 
-- [ ] **Step 5: Обновить `app/hashing.py`**
+- [x] **Step 5: Обновить `app/hashing.py`**
 
 Заменить функцию `check_password` и добавить `DUMMY_HASH` в конец файла:
 ```python
@@ -1397,7 +1397,7 @@ def check_password(password: str, hashed_password: str) -> bool:
 DUMMY_HASH = bcrypt.hashpw(b"dummy-password-for-timing-equalization", bcrypt.gensalt()).decode('utf-8')
 ```
 
-- [ ] **Step 6: Добавить `get_user_credentials` в `app/repositories/users_repository.py`**
+- [x] **Step 6: Добавить `get_user_credentials` в `app/repositories/users_repository.py`**
 
 Вставить после `get_user_by_id`:
 ```python
@@ -1413,7 +1413,7 @@ def get_user_credentials(username: str):
         release_db_connection(connection)
 ```
 
-- [ ] **Step 7: Создать `app/auth_guard.py`**
+- [x] **Step 7: Создать `app/auth_guard.py`**
 
 ```python
 from functools import wraps
@@ -1447,7 +1447,7 @@ def ensure_owner(user_id: int) -> None:
         raise Forbidden()
 ```
 
-- [ ] **Step 8: Переписать `app/controllers/auth_controller.py`**
+- [x] **Step 8: Переписать `app/controllers/auth_controller.py`**
 
 ```python
 # app/auth_controller.py
@@ -1542,17 +1542,17 @@ class Logout(Resource):
         return "", 204
 ```
 
-- [ ] **Step 9: Удалить заменённые модули**
+- [x] **Step 9: Удалить заменённые модули**
 
 Run: `git rm -q app/redis_cache.py app/repositories/auth_repository.py && grep -rn "redis_cache\|auth_repository" app tests init_db.py`
 Expected: grep ничего не находит (exit code 1).
 
-- [ ] **Step 10: Убедиться, что тесты проходят**
+- [x] **Step 10: Убедиться, что тесты проходят**
 
 Run: `.venv/bin/python -m pytest tests/unit -q`
 Expected: PASS, все тесты зелёные.
 
-- [ ] **Step 11: Commit**
+- [x] **Step 11: Commit**
 
 ```bash
 git add app/auth_guard.py app/controllers/auth_controller.py app/hashing.py app/repositories/users_repository.py tests/unit/conftest.py tests/unit/test_hashing.py tests/unit/test_auth_api.py
