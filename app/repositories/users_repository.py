@@ -1,4 +1,7 @@
 import psycopg2.extras
+from psycopg2 import errors as pg_errors
+
+from app.errors import UserAlreadyExists
 from app.db import get_db_connection, release_db_connection
 from app.logger_config import setup_logger
 from app.performance_monitor import log_duration
@@ -21,6 +24,10 @@ def create_user(username: str, hashed_password: str, email: str = None):
         connection.commit()
         logger.info(f"User created: {username}")
         return user
+    except pg_errors.UniqueViolation as e:
+        connection.rollback()
+        logger.warning(f"Username already taken: {username}")
+        raise UserAlreadyExists() from e
     except Exception as e:
         connection.rollback()
         logger.error(f"Error creating user {username}: {e}")
