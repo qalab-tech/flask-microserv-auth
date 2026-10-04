@@ -83,7 +83,7 @@
 **Interfaces:**
 - Produces: `config.load_secret_key(env: Mapping[str, str]) -> str`, `config.parse_bool(value: str | None) -> bool`, `config.MIN_SECRET_KEY_LENGTH = 32`, `config.SECRET_KEY: str`, `config.JWT_ACCESS_TOKEN_EXPIRES: int`, `config.REDIS_HOST: str`, `config.REDIS_PORT: int`, `config.SEED_TEST_USERS: bool`; `app.db._connection_pool` (модульная переменная, `None` до первого вызова), `app.db.get_db_connection()`, `app.db.release_db_connection(conn)`.
 
-- [ ] **Step 1: Обновить зависимости и установить**
+- [x] **Step 1: Обновить зависимости и установить**
 
 `requirements.txt` целиком. Строка `allure-pytest` уже есть в рабочей копии пользователя, она сохраняется:
 ```
@@ -106,7 +106,7 @@ requests
 Run: `.venv/bin/python -m pip install -r requirements.txt`
 Expected: `Successfully installed ... fakeredis-...` (остальное уже стоит).
 
-- [ ] **Step 2: Значения env по умолчанию для тестов**
+- [x] **Step 2: Значения env по умолчанию для тестов**
 
 В `tests/conftest.py` заменить строки 1–9 (импорты и `sys.path`) на код ниже. Фикстуры ниже по файлу пока не трогать:
 ```python
@@ -128,7 +128,7 @@ os.environ.setdefault("REDIS_PORT", "6379")
 from config import BASE_URL, HEADERS  # noqa: E402
 ```
 
-- [ ] **Step 3: Написать падающие тесты**
+- [x] **Step 3: Написать падающие тесты**
 
 `tests/unit/test_config.py`:
 ```python
@@ -214,12 +214,12 @@ def test_missing_database_url_fails_on_first_use(fake_pool, monkeypatch):
         db.get_db_connection()
 ```
 
-- [ ] **Step 4: Убедиться, что тесты падают**
+- [x] **Step 4: Убедиться, что тесты падают**
 
 Run: `.venv/bin/python -m pytest tests/unit/test_config.py tests/unit/test_db.py -q`
 Expected: FAIL / ERROR — `ImportError: cannot import name 'MIN_SECRET_KEY_LENGTH'`, а импорт `app.db` падает на создании пула (нет БД).
 
-- [ ] **Step 5: Реализовать `config.py`**
+- [x] **Step 5: Реализовать `config.py`**
 
 ```python
 import os
@@ -254,7 +254,7 @@ BASE_URL = "http://localhost:5001"
 HEADERS = {"Content-Type": "application/json"}
 ```
 
-- [ ] **Step 6: Реализовать ленивый пул в `app/db.py`**
+- [x] **Step 6: Реализовать ленивый пул в `app/db.py`**
 
 ```python
 import os
@@ -317,7 +317,7 @@ def close_all_connections():
         logger.error(f"Error closing all connections: {str(e)}")
 ```
 
-- [ ] **Step 7: Убедиться, что тесты проходят**
+- [x] **Step 7: Убедиться, что тесты проходят**
 
 Run: `.venv/bin/python -m pytest tests/unit/test_config.py tests/unit/test_db.py -q`
 Expected: PASS (14 passed).
@@ -325,7 +325,7 @@ Expected: PASS (14 passed).
 Run: `.venv/bin/python -c "import sys; sys.path.insert(0,'.'); import os; os.environ.setdefault('SECRET_KEY','x'*32); from app import app; print('ok')"`
 Expected: `ok` — приложение импортируется без БД.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add requirements.txt config.py app/db.py tests/conftest.py tests/unit/test_config.py tests/unit/test_db.py
