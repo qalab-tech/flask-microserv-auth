@@ -2293,7 +2293,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>" -- init_db.py docker-co
 
 Имена файлов не должны совпадать с unit-тестами (`test_auth_api.py`, `test_users_api.py`): в каталогах нет `__init__.py`, и одинаковые имена модулей ломают коллекцию pytest.
 
-- [ ] **Step 1: Перенести файлы**
+- [x] **Step 1: Перенести файлы**
 
 ```bash
 mkdir -p tests/integration
@@ -2302,7 +2302,7 @@ git mv tests/test_users_negative_cases.py tests/integration/test_users_negative_
 git mv tests/test_auth_service.py tests/integration/test_auth_integration.py
 ```
 
-- [ ] **Step 2: Оставить в `tests/conftest.py` только bootstrap**
+- [x] **Step 2: Оставить в `tests/conftest.py` только bootstrap**
 
 Файл целиком:
 ```python
@@ -2319,7 +2319,7 @@ os.environ.setdefault("REDIS_HOST", "localhost")
 os.environ.setdefault("REDIS_PORT", "6379")
 ```
 
-- [ ] **Step 3: Создать `tests/integration/conftest.py`**
+- [x] **Step 3: Создать `tests/integration/conftest.py`**
 
 ```python
 import uuid
@@ -2388,7 +2388,7 @@ def test_user(user_factory):
     return user_factory()
 ```
 
-- [ ] **Step 4: Переписать `tests/integration/test_auth_integration.py`**
+- [x] **Step 4: Переписать `tests/integration/test_auth_integration.py`**
 
 ```python
 import pytest
@@ -2452,7 +2452,7 @@ def test_logout_revokes_token(test_user, login):
     test_user["headers"] = {**HEADERS, "Authorization": f"Bearer {token}"}
 ```
 
-- [ ] **Step 5: Переписать `tests/integration/test_users_positive_cases.py`**
+- [x] **Step 5: Переписать `tests/integration/test_users_positive_cases.py`**
 
 ```python
 import time
@@ -2544,7 +2544,7 @@ def test_delete_user(test_user):
     assert validate.json()["status"] == "revoked"
 ```
 
-- [ ] **Step 6: Переписать `tests/integration/test_users_negative_cases.py`**
+- [x] **Step 6: Переписать `tests/integration/test_users_negative_cases.py`**
 
 ```python
 import pytest
@@ -2641,7 +2641,7 @@ def test_update_with_empty_body(test_user):
     assert resp.status_code == 400
 ```
 
-- [ ] **Step 7: Обновить `Makefile`**
+- [x] **Step 7: Обновить `Makefile`**
 
 Заменить секцию «Тесты» на:
 ```makefile
@@ -2662,7 +2662,7 @@ test-negative:
 	@echo "  make test-unit       - Unit-тесты локально, без Docker"
 ```
 
-- [ ] **Step 8: Проверить коллекцию и unit-тесты**
+- [x] **Step 8: Проверить коллекцию и unit-тесты**
 
 Run: `.venv/bin/python -m pytest tests/unit tests/integration --collect-only -q | tail -3`
 Expected: `N tests collected` без ошибок коллекции.
@@ -2670,14 +2670,14 @@ Expected: `N tests collected` без ошибок коллекции.
 Run: `.venv/bin/python -m pytest tests/unit -q`
 Expected: PASS.
 
-- [ ] **Step 9: Прогнать интеграционные тесты на живом сервисе**
+- [ ] **Step 9: Прогнать интеграционные тесты на живом сервисе** (не выполнен: нет Docker)
 
 Run: `make fresh && sleep 20 && make test`
 Expected: все тесты PASS.
 
 Если `docker`/`docker-compose` недоступен в окружении исполнителя, шаг не пропускать молча: в отчёте явно написать «интеграционные тесты не запускались, нужен прогон `make fresh && make test` у пользователя».
 
-- [ ] **Step 10: Commit**
+- [x] **Step 10: Commit**
 
 ```bash
 git add tests/conftest.py tests/integration Makefile
