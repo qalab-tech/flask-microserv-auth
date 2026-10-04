@@ -2090,7 +2090,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>" -- app/repositories/use
 - Consumes: `config.SEED_TEST_USERS` (Task 1), `app.db.get_db_connection` / `release_db_connection`.
 - Produces: `init_db.initialize_database(seed_test_users: bool) -> None`, `init_db.main() -> int` (0 — успех, 1 — ошибка).
 
-- [ ] **Step 1: Написать падающие тесты**
+- [x] **Step 1: Написать падающие тесты**
 
 `tests/unit/test_init_db.py`:
 ```python
@@ -2179,12 +2179,12 @@ def test_main_returns_error_code_when_schema_creation_fails(connection):
     assert not conn.committed
 ```
 
-- [ ] **Step 2: Убедиться, что тесты падают**
+- [x] **Step 2: Убедиться, что тесты падают**
 
 Run: `.venv/bin/python -m pytest tests/unit/test_init_db.py -q`
 Expected: FAIL — `AttributeError: module 'init_db' has no attribute 'initialize_database'`.
 
-- [ ] **Step 3: Переписать `init_db.py`**
+- [x] **Step 3: Переписать `init_db.py`**
 
 ```python
 import sys
@@ -2254,19 +2254,19 @@ if __name__ == "__main__":
     sys.exit(main())
 ```
 
-- [ ] **Step 4: Включить тестовых пользователей в compose для dev**
+- [x] **Step 4: Включить тестовых пользователей в compose для dev**
 
 В `docker-compose.yml`, секция `auth-service.environment`, после строки `ENV: docker` добавить:
 ```yaml
       SEED_TEST_USERS: "true"
 ```
 
-- [ ] **Step 5: Убедиться, что тесты проходят**
+- [x] **Step 5: Убедиться, что тесты проходят**
 
 Run: `.venv/bin/python -m pytest tests/unit -q`
 Expected: PASS, все тесты зелёные.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add init_db.py docker-compose.yml tests/unit/test_init_db.py
