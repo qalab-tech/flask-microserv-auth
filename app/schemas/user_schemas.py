@@ -1,32 +1,37 @@
-from datetime import datetime
+from typing import Annotated
 
-from pydantic import BaseModel, EmailStr, Field
-from typing import Optional
+from pydantic import AfterValidator, BaseModel, EmailStr, Field, model_validator
 
-class UserBase(BaseModel):
-    username: str = Field(..., min_length=3, max_length=50)
-    email: Optional[EmailStr] = None
+from app.hashing import BCRYPT_MAX_BYTES
 
-class UserRegister(UserBase):
-    password: str = Field(..., min_length=6)
+
+def _check_password_bytes(password: str) -> str:
+    if len(password.encode("utf-8")) > BCRYPT_MAX_BYTES:
+        raise ValueError(f"Password must be at most {BCRYPT_MAX_BYTES} bytes in UTF-8")
+    return password
+
+
+# At least 6 characters; at most 72 bytes because bcrypt ignores everything after that.
+Password = Annotated[str, Field(min_length=6), AfterValidator(_check_password_bytes)]
+
+
+class UserRegister(BaseModel):
+    username: str = Field(min_length=3, max_length=50)
+    email: EmailStr | None = None
+    password: Password
+
 
 class UserUpdate(BaseModel):
-    email: Optional[EmailStr] = None
-    password: Optional[str] = Field(None, min_length=6)
+    email: EmailStr | None = None
+    password: Password | None = None
 
-class UserResponse(BaseModel):
-    id: int
-    username: str
-    email: Optional[str]
-    created_at: datetime
-
-    class Config:
-        from_attributes = True
-        json_encoders = {
-            datetime: lambda v: v.isoformat()   # ← вот это главное
-        }
+    @model_validator(mode="after")
+    def check_not_empty(self):
+        if self.email is None and self.password is None:
+            raise ValueError("At least one of 'email' or 'password' must be provided")
+        return self
 
 
-class UserListResponse(BaseModel):
-    users: list[UserResponse]
-    total: int
+class LoginRequest(BaseModel):
+    username: str = Field(min_length=1)
+    password: str = Field(min_length=1)
