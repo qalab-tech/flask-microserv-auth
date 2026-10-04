@@ -38,12 +38,12 @@ def get_users_list(limit: int = 50, offset: int = 0) -> dict:
 def update_user_profile(user_id: int, data: UserUpdate) -> dict:
     """Обновление профиля; смена пароля отзывает все токены пользователя"""
     hashed_password = hash_password(data.password) if data.password is not None else None
+    if hashed_password is not None:
+        # Revoke first: if Redis is down, the password is not changed and the client gets 503.
+        revoke_all_for_user(user_id)
     user = update_user(user_id=user_id, email=data.email, hashed_password=hashed_password)
     if not user:
         raise UserNotFound()
-    if hashed_password is not None:
-        # After the DB write: if Redis is down the client gets 503 and can safely retry.
-        revoke_all_for_user(user_id)
     return user
 
 
