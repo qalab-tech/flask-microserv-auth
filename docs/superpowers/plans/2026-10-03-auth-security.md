@@ -1574,7 +1574,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>" -- app/auth_guard.py ap
 - Consumes: `require_auth`, `ensure_owner` (Task 4); `revoke_all_for_user` (Task 3); `parse_body`, `UserRegister`, `UserUpdate`, `UserNotFound`, `UserAlreadyExists` (Task 2); фикстуры `client`, `make_user`, `repo`, `clock`, `break_redis` (Tasks 3–4).
 - Produces: `user_service.register_user(data: UserRegister) -> dict`, `get_user_profile(user_id: int) -> dict`, `get_users_list(limit=50, offset=0) -> dict`, `update_user_profile(user_id: int, data: UserUpdate) -> dict`, `remove_user(user_id: int) -> None`; эндпоинт `GET /users/me`.
 
-- [ ] **Step 1: Написать падающий тест репозитория**
+- [x] **Step 1: Написать падающий тест репозитория**
 
 `tests/unit/test_users_repository.py`:
 ```python
@@ -1636,7 +1636,7 @@ def test_other_database_errors_propagate_unchanged(connection_failing_with):
         users_repository.create_user("alice", "hash")
 ```
 
-- [ ] **Step 2: Написать падающие API-тесты пользователей**
+- [x] **Step 2: Написать падающие API-тесты пользователей**
 
 `tests/unit/test_users_api.py`:
 ```python
@@ -1880,12 +1880,12 @@ def test_unexpected_error_returns_generic_500(client, make_user, monkeypatch):
     assert resp.json == {"message": "Internal server error"}
 ```
 
-- [ ] **Step 3: Убедиться, что тесты падают**
+- [x] **Step 3: Убедиться, что тесты падают**
 
 Run: `.venv/bin/python -m pytest tests/unit/test_users_repository.py tests/unit/test_users_api.py -q`
 Expected: FAIL — `UniqueViolation` вместо `UserAlreadyExists`; 200 вместо 401/403 на чужих и неавторизованных запросах; 404 на `/users/me`; 400 вместо 409.
 
-- [ ] **Step 4: Обработать `UniqueViolation` в `create_user`**
+- [x] **Step 4: Обработать `UniqueViolation` в `create_user`**
 
 В `app/repositories/users_repository.py` добавить импорты:
 ```python
@@ -1901,7 +1901,7 @@ from app.errors import UserAlreadyExists
         raise UserAlreadyExists() from e
 ```
 
-- [ ] **Step 5: Переписать `app/services/user_service.py`**
+- [x] **Step 5: Переписать `app/services/user_service.py`**
 
 ```python
 from app.errors import UserNotFound
@@ -1961,7 +1961,7 @@ def remove_user(user_id: int) -> None:
         raise UserNotFound()
 ```
 
-- [ ] **Step 6: Переписать `app/controllers/users_controller.py`**
+- [x] **Step 6: Переписать `app/controllers/users_controller.py`**
 
 ```python
 from flask import Blueprint, g
@@ -2060,7 +2060,7 @@ class UserDetail(Resource):
         return {"message": "User deleted successfully"}, 200
 ```
 
-- [ ] **Step 7: Убедиться, что тесты проходят**
+- [x] **Step 7: Убедиться, что тесты проходят**
 
 Run: `.venv/bin/python -m pytest tests/unit -q`
 Expected: PASS, все тесты зелёные.
@@ -2068,7 +2068,7 @@ Expected: PASS, все тесты зелёные.
 Run: `grep -n "str(e)" app/controllers/*.py`
 Expected: ничего (exit code 1).
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add app/repositories/users_repository.py app/services/user_service.py app/controllers/users_controller.py tests/unit/test_users_repository.py tests/unit/test_users_api.py
